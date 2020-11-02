@@ -1,11 +1,28 @@
-import React from 'react';
-import Home from './components/Home/Home'
+import React, { createContext, useReducer } from 'react';
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Home from "./components/Home/Home";
+import Login from "./components/Login/Login"
+import { initialState, reducer } from "./store/github/reducer";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+export const AuthContext = createContext({state: {client_id:String,  redirect_uri: String}, dispatch:{}});
 
 function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
   return (
-      <Home />
+    <AuthContext.Provider
+      value={{
+        state,
+        dispatch
+      }}
+    >
+    <Router>
+      <Switch>
+        <Route path="/login" component={Login}/>
+        <Route path="/" component={Home}/>
+      </Switch>
+    </Router>
+    </AuthContext.Provider>
   );
 }
 
