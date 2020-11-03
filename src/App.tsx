@@ -5,10 +5,10 @@ import Login from "./components/Login/Login"
 import { initialState, reducer } from "./store/github/reducer";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-export const AuthContext = createContext({state: {client_id:String,  redirect_uri: String}, dispatch:{}});
-
+export const AuthContext = createContext({state: Object(), dispatch: Object()});
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
+
   return (
     <AuthContext.Provider
       value={{
