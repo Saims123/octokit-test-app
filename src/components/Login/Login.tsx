@@ -5,10 +5,11 @@ import { Redirect } from "react-router-dom";
 import GithubIcon from "mdi-react/GithubIcon";
 import { AuthContext } from "../../App";
 import queryString from 'query-string';
+import { userInfo } from 'os';
 const Login: React.FC = () => {
   const [data, setData] = React.useState({ errorMessage: "", isLoading: false });
   const { state, dispatch } = useContext(AuthContext);
-  const { client_id, client_secret, redirect_uri } = state;
+  const { client_id, redirect_uri } = state;
   const { Octokit } = require("@octokit/rest");
 
 
@@ -31,13 +32,14 @@ const Login: React.FC = () => {
       const proxy_url = "https://cors-anywhere.herokuapp.com/"
       const target_url = `https://github.com/login/oauth/access_token?client_id=${state.client_id}&client_secret=${state.client_secret}&code=${newUrl[1]}&redirect_uri=${state.redirect_uri}`;
       // Use code parameter and other parameters to make POST request to proxy_server
+      let access_token: any
       fetch(proxy_url+target_url, {
         method: "POST",
 
       })
         .then(response => response.text())
         .then(params => {
-          const access_token = queryString.parse(params)?.access_token
+          access_token = queryString.parse(params)?.access_token || null
           const octokit = new Octokit({
             auth: access_token
           })
@@ -46,7 +48,7 @@ const Login: React.FC = () => {
         .then(user => {
           dispatch({
             type: "LOGIN",
-            payload: { user: user.data, isLoggedIn: true }
+            payload: { user: user.data, isLoggedIn: true , access_token: access_token}
           });
         })
         .catch(error => {
