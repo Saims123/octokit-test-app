@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import styles from "./CSV.module.css";
-// import DataGrid, {Column} from "react-data-grid";
-import "react-data-grid/dist/react-data-grid.css";
+
 import { Octokit } from "@octokit/rest";
 import { AuthContext } from "../../App";
 import { parse } from "papaparse";
@@ -9,19 +8,18 @@ import { parse } from "papaparse";
 const CSV: React.FC = () => {
   const { state, dispatch } = useContext(AuthContext);
   const [csvData, setCsvData] = useState({});
+  const repoOwner = state.user.login
+  const targetRepo = "octokit-test-app"
+  const targetRepoPath = 'src/sample_data'
+  const fileName = "big_sample.csv"
+  const targetBranch = "heads/master"
+  const newBranch = "heads/chore/update_sample_data"
+
+
   const octokit = new Octokit({
     auth: state.access_token,
   });
-  // const columns: Column<any>[] = [
-  //   { key: "id", name: "ID" },
-  //   { key: "title", name: "Title" },
-  //   { key: "count", name: "Count" },
-  // ];
-  // const rows: Row[] = [
-  //   { id: 0, title: "row1", count: 20 },
-  //   { id: 1, title: "row1", count: 40 },
-  //   { id: 2, title: "row1", count: 60 },
-  // ];
+
   useEffect(() => {
     getSampleData();
     console.log(csvData)
@@ -30,13 +28,13 @@ const CSV: React.FC = () => {
     return await octokit.repos
       .getContent({
         owner: state.user.login,
-        repo: "octokit-test-app",
-        path: "src/sample_data",
+        repo: targetRepo,
+        path: targetRepoPath,
       })
       .then((result) => {
         if (Array.isArray(result.data)) {
           const csvFile = result.data.find(
-            (file) => file.name === "big_sample.csv"
+            (file) => file.name === fileName
           );
           return (csvFile?.sha || "").toString();
         }
@@ -48,7 +46,7 @@ const CSV: React.FC = () => {
       octokit.git
         .getBlob({
           owner: state.user.login,
-          repo: "octokit-test-app",
+          repo: targetRepo,
           file_sha: fileSha,
         })
         .then((result) => {
@@ -60,14 +58,27 @@ const CSV: React.FC = () => {
         });
     });
   };
+
+  const createBranch = async (_sha: string) => {
+    return await octokit.git.createRef({
+      owner: repoOwner,
+      repo: targetRepo,
+      ref: newBranch,
+      sha: _sha
+    })
+  }
+
+
+  const getMasterRef = async () => {
+    return await octokit.git.getRef({
+      owner: repoOwner,
+      repo: targetRepo,
+      ref: targetBranch
+    }).then(result => result.data.object)
+  }
+
   return (
     <div className={styles.CSV} data-testid="CSV">
-      CSV Component
-      {/* <DataGrid
-        rows={rows}
-        columns={columns}
-      /> */}
-      {/* <p>{csvData}</p> */}
     </div>
   );
 };

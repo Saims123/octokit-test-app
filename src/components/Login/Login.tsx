@@ -22,12 +22,6 @@ const Login: React.FC = () => {
       window.history.pushState({}, '', newUrl[0]);
       setData({ ...data, isLoading: true });
       console.log(data)
-      const requestData = {
-        client_id: state.client_id,
-        redirect_uri: state.redirect_uri,
-        client_secret: state.client_secret,
-        code: newUrl[1]
-      };
 
       const proxy_url = "https://cors-anywhere.herokuapp.com/"
       const target_url = `https://github.com/login/oauth/access_token?client_id=${state.client_id}&client_secret=${state.client_secret}&code=${newUrl[1]}&redirect_uri=${state.redirect_uri}`;
@@ -84,7 +78,7 @@ const Login: React.FC = () => {
                 }
                 <a
                   className="login-link"
-                  href={`https://github.com/login/oauth/authorize?scope=user&client_id=${client_id}&redirect_uri=${redirect_uri}`}
+                  href={`https://github.com/login/oauth/authorize?scope=user,repo&client_id=${client_id}&redirect_uri=${redirect_uri}`}
                   onClick={() => {
                     setData({ ...data, errorMessage: "" });
                   }}
